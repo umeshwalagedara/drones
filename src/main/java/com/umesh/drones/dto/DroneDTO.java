@@ -10,6 +10,7 @@ import jakarta.persistence.OneToMany;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -18,6 +19,7 @@ import lombok.Setter;
 @Data
 @Getter
 @Setter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class DroneDTO {
@@ -28,6 +30,5 @@ public class DroneDTO {
   private Double weightLimit;
   private Double batteryCapacity;
   private DroneState state;
-  private List<Medication> medications = new ArrayList<>();
 
 }

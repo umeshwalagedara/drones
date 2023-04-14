@@ -13,7 +13,9 @@ import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.Getter;
@@ -22,6 +24,8 @@ import lombok.NoArgsConstructor;
 
 @Data
 @Getter
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
 @Entity
 @Table(name = "drones")
@@ -43,8 +47,8 @@ public class Drone {
   @Enumerated(EnumType.STRING)
   private DroneState state;
 
-  @OneToMany(mappedBy = "drone", cascade = CascadeType.ALL, orphanRemoval = true)
-  private List<Medication> medications = new ArrayList<>();
+  @OneToMany(mappedBy = "drone", orphanRemoval = true)
+  private List<Medication> medications;
 
   public void setId(final Long id) {
     this.id = id;
@@ -58,6 +62,10 @@ public class Drone {
   }
 
   public void setModel(final DroneModel model) {
+    List<DroneModel> droneModelList = Arrays.asList(DroneModel.values());
+    if(!droneModelList.contains(model)){
+      throw new IllegalArgumentException(" Invalid DroneModel");
+    }
     this.model = model;
   }
 
@@ -69,10 +77,17 @@ public class Drone {
   }
 
   public void setBatteryCapacity(final Double batteryCapacity) {
+    if(batteryCapacity > 100){
+      throw new IllegalArgumentException("Invalid battery percentage specified.");
+    }
     this.batteryCapacity = batteryCapacity;
   }
 
   public void setState(final DroneState state) {
+    List<DroneState> droneStateList = Arrays.asList(DroneState.values());
+    if(!droneStateList.contains(state)){
+      throw new IllegalArgumentException("Invalid DroneState.");
+    }
     this.state = state;
   }
 
