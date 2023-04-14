@@ -5,6 +5,7 @@ import com.umesh.drones.entity.Medication;
 import com.umesh.drones.repository.MedicationRepo;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -14,23 +15,29 @@ public class MedicationService {
   @Autowired
   private MedicationRepo medicationRepo;
 
-  public void addNewMedication(List<MedicationDTO> medicationDTOS){
+  public List<Medication> addNewMedication(List<MedicationDTO> medicationDTOS){
 
-    List<Medication> medicationList = new ArrayList<>();
+      List<Medication> medicationList = new ArrayList<>();
+      for(MedicationDTO dto: medicationDTOS){
 
-    for(MedicationDTO dto: medicationDTOS){
-      Medication medication = new Medication();
+        Medication medication = new Medication();
+        if(dto.getId() == 0){
+          medication.setName(dto.getName());
+          medication.setImage(dto.getImage());
+          medication.setWeight(dto.getWeight());
+          medication.setCode(dto.getCode());
+          medication = medicationRepo.save(medication);
+          medicationList.add(medication);
 
-      if(dto.getId() == 0){
+        }else{
+          Optional<Medication> med =  medicationRepo.findById(dto.getId());
+          Medication medication1 = med.orElseThrow(() -> new IllegalArgumentException("Invalid medication id: " + dto.getId()));
+          medicationList.add(medication1);
 
-
-      }else{
-        // already added
+          // already added will not be allowed to modify
+        }
       }
-
-
-    }
-
+      return medicationList;
   }
 
   public MedicationDTO mapToDTO(Medication medication) {

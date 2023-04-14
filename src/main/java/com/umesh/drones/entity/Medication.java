@@ -43,9 +43,9 @@ public class Medication {
   }
 
   public void setName(final String name) {
-//    if (!name.matches("[A-Za-z0-9_-]+")) {
-//      throw new IllegalArgumentException("Name contains invalid characters.");
-//    }
+    if (!name.matches("[A-Za-z0-9_-]+")) {
+      throw new IllegalArgumentException("Name contains invalid characters.");
+    }
     this.name = name;
   }
 
@@ -54,6 +54,9 @@ public class Medication {
   }
 
   public void setCode(final String code) {
+    if (!code.matches("[A-Z_0-9_]+")) {
+      throw new IllegalArgumentException("Code contains invalid characters.");
+    }
     this.code = code;
   }
 

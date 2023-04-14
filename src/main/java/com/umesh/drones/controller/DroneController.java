@@ -3,8 +3,12 @@ package com.umesh.drones.controller;
 import com.umesh.drones.dto.DroneDTO;
 import com.umesh.drones.dto.MedicationDTO;
 import com.umesh.drones.entity.Drone;
+import com.umesh.drones.entity.Medication;
 import com.umesh.drones.service.DroneService;
+import com.umesh.drones.service.MedicationService;
+import com.umesh.drones.util.DroneState;
 import com.umesh.drones.util.ErrorResponse;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +29,8 @@ public class DroneController {
 
   @Autowired
   private DroneService droneService;
+  @Autowired
+  private MedicationService medicationService;
 
   @PostMapping
   public ResponseEntity registerDrone(@RequestBody DroneDTO droneDTO) {
@@ -46,9 +52,16 @@ public class DroneController {
   }
 
   @PostMapping("/{droneId}/medications")
-  public ResponseEntity<Void> loadDrone(@PathVariable Long droneId, @RequestBody List<MedicationDTO> medications) {
-    //todo
-    return null;
+  public ResponseEntity loadDrone(@PathVariable Long droneId, @RequestBody List<MedicationDTO> medications) {
+
+    try{
+      droneService.loadDrone(droneId, medications);
+      return ResponseEntity.status(HttpStatus.OK).build();
+    }catch (Exception e){
+      LOGGER.severe(e.getMessage());
+      ErrorResponse errorResponse = new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), e.getMessage(), System.currentTimeMillis() );
+      return ResponseEntity.status(500).body(errorResponse);
+    }
   }
 
 

@@ -91,7 +91,6 @@ public class DroneService {
   }
 
   public double getBatteryLevel(final Long droneId) {
-
     Optional<Drone> drone =  droneRepo.findById(droneId);
     return  drone.get().getBatteryCapacity();
   }
@@ -112,4 +111,34 @@ public class DroneService {
 
     return medicationDTOS;
   }
+
+
+  public Drone getDroneById(final Long id) {
+    Optional<Drone> droneOptional = droneRepo.findById(id);
+    Drone drone = droneOptional.orElseThrow( () -> new IllegalArgumentException("Invalid drone id: " + id));
+    return drone;
+  }
+
+
+  public void loadDrone(final Long droneId, List<MedicationDTO> medicationDTOS) {
+
+      List<Medication> medicationList = medicationService.addNewMedication(medicationDTOS);
+      Optional<Drone> droneOptional = droneRepo.findById(droneId);
+      Drone drone = droneOptional.orElseThrow( () -> new IllegalArgumentException("Invalid drone id: " + droneId));
+
+      if(drone.getState() == DroneState.IDLE){
+        throw new IllegalStateException("Drone must be in IDLE state to be loaded");
+      }
+
+      double totalWeight = medicationList.stream().mapToDouble(Medication::getWeight).sum();
+      if (totalWeight > drone.getWeightLimit()) {
+        throw new IllegalArgumentException("Total weight of medications exceeds drone's weight limit");
+      }
+
+      drone.setMedications(medicationList);
+      drone.setState(DroneState.LOADED);
+      droneRepo.save(drone);
+
+  }
+
 }
