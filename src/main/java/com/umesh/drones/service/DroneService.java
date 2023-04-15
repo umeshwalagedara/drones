@@ -5,15 +5,16 @@ import com.umesh.drones.dto.MedicationDTO;
 import com.umesh.drones.entity.Drone;
 import com.umesh.drones.entity.Medication;
 import com.umesh.drones.repository.DroneRepo;
+import com.umesh.drones.repository.MedicationRepo;
 import com.umesh.drones.util.DroneState;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class DroneService {
@@ -22,22 +23,14 @@ public class DroneService {
   private DroneRepo droneRepo;
   @Autowired
   private MedicationService medicationService;
+  @Autowired
+  private MedicationRepo medicationRepo;
 
-  /**
-   *
-   * @param droneDTO
-   * @return
-   */
+
   public DroneDTO registerDrone(DroneDTO droneDTO) throws Exception {
-
-    try{
       Drone drone = mapToEntity(droneDTO);
       drone = droneRepo.save(drone);
       return mapToDTO(drone);
-    }catch (Exception e){
-        throw new Exception(e);
-    }
-
   }
 
   public List<DroneDTO> getDrones() {
@@ -104,12 +97,8 @@ public class DroneService {
 
   public List<MedicationDTO> getLoadedMedications(final Long droneId) {
     Drone drone = droneRepo.findById(droneId).orElseThrow(() -> new IllegalArgumentException("Invalid drone id: " + droneId));
-    List<MedicationDTO> medicationDTOS = new ArrayList<>();
-    for(Medication medication: drone.getMedications()){
-      medicationDTOS.add(medicationService.mapToDTO(medication));
-    }
-
-    return medicationDTOS;
+    List<MedicationDTO> medicationDTOList = medicationService.findByDroneId(drone.getId());
+    return medicationDTOList;
   }
 
 
@@ -120,24 +109,35 @@ public class DroneService {
   }
 
 
+  @Transactional
   public void loadDrone(final Long droneId, List<MedicationDTO> medicationDTOS) {
 
-      List<Medication> medicationList = medicationService.addNewMedication(medicationDTOS);
       Optional<Drone> droneOptional = droneRepo.findById(droneId);
       Drone drone = droneOptional.orElseThrow( () -> new IllegalArgumentException("Invalid drone id: " + droneId));
 
-      if(drone.getState() == DroneState.IDLE){
+      if(drone.getState() != DroneState.IDLE){
         throw new IllegalStateException("Drone must be in IDLE state to be loaded");
       }
 
-      double totalWeight = medicationList.stream().mapToDouble(Medication::getWeight).sum();
+      double totalWeight = medicationDTOS.stream().mapToDouble(MedicationDTO::getWeight).sum();
       if (totalWeight > drone.getWeightLimit()) {
         throw new IllegalArgumentException("Total weight of medications exceeds drone's weight limit");
       }
 
-      drone.setMedications(medicationList);
-      drone.setState(DroneState.LOADED);
-      droneRepo.save(drone);
+    List<Medication> medicationList = new ArrayList<>();
+    for(MedicationDTO dto: medicationDTOS){
+      Medication medication = new Medication();
+      medication.setName(dto.getName());
+      medication.setImage(dto.getImage());
+      medication.setWeight(dto.getWeight());
+      medication.setCode(dto.getCode());
+      medication.setDroneId(drone.getId());
+      medicationList.add(medication);
+    }
+
+    medicationRepo.saveAll(medicationList);
+    drone.setState(DroneState.LOADED);
+    droneRepo.save(drone);
 
   }
 

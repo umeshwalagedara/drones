@@ -1,21 +1,22 @@
 package com.umesh.drones.entity;
 
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import javax.validation.constraints.Pattern;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
+@AllArgsConstructor
 @Getter
+@Builder
 @Entity
 @Table(name = "medication")
 public class Medication {
@@ -34,9 +35,7 @@ public class Medication {
 
   private byte[] image;
 
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "drone_id")
-  private Drone drone;
+  private Long droneId;
 
   public void setId(final Long id) {
     this.id = id;
@@ -64,7 +63,8 @@ public class Medication {
     this.image = image;
   }
 
-  public void setDrone(final Drone drone) {
-    this.drone = drone;
+
+  public void setDroneId(final Long droneId) {
+    this.droneId = droneId;
   }
 }

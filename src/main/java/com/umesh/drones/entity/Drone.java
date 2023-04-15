@@ -47,9 +47,6 @@ public class Drone {
   @Enumerated(EnumType.STRING)
   private DroneState state;
 
-  @OneToMany(mappedBy = "drone", orphanRemoval = true)
-  private List<Medication> medications;
-
   public void setId(final Long id) {
     this.id = id;
   }
@@ -71,7 +68,7 @@ public class Drone {
 
   public void setWeightLimit(final Double weightLimit) {
     if (weightLimit > 500) {
-      throw new IllegalArgumentException("Weight is too heavy.");
+      throw new IllegalArgumentException("WeightLimit exceeds max weight Limit.");
     }
     this.weightLimit = weightLimit;
   }
@@ -91,7 +88,4 @@ public class Drone {
     this.state = state;
   }
 
-  public void setMedications(final List<Medication> medications) {
-    this.medications = medications;
-  }
 }

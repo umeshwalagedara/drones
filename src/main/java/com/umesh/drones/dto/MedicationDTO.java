@@ -26,6 +26,5 @@ public class MedicationDTO {
   private Double weight;
   private String code;
   private byte[] image;
-  private Drone drone;
 
 }

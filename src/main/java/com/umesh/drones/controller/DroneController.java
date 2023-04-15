@@ -2,13 +2,9 @@ package com.umesh.drones.controller;
 
 import com.umesh.drones.dto.DroneDTO;
 import com.umesh.drones.dto.MedicationDTO;
-import com.umesh.drones.entity.Drone;
-import com.umesh.drones.entity.Medication;
 import com.umesh.drones.service.DroneService;
 import com.umesh.drones.service.MedicationService;
-import com.umesh.drones.util.DroneState;
-import com.umesh.drones.util.ErrorResponse;
-import java.util.ArrayList;
+import com.umesh.drones.util.ResponseMessage;
 import java.util.List;
 import java.util.logging.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,7 +35,7 @@ public class DroneController {
       return ResponseEntity.ok(registeredDrone);
     }catch (Exception e){
       LOGGER.severe(e.getMessage());
-      ErrorResponse errorResponse = new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), e.getMessage(), System.currentTimeMillis() );
+      ResponseMessage errorResponse = new ResponseMessage(HttpStatus.INTERNAL_SERVER_ERROR.value(), e.getMessage(), System.currentTimeMillis() );
       return ResponseEntity.status(500).body(errorResponse);
     }
   }
@@ -56,11 +52,12 @@ public class DroneController {
 
     try{
       droneService.loadDrone(droneId, medications);
-      return ResponseEntity.status(HttpStatus.OK).build();
+      ResponseMessage successResponse  = new ResponseMessage(HttpStatus.OK.value(), "Drone loaded successfully.", System.currentTimeMillis());
+      return ResponseEntity.status(HttpStatus.OK).body(successResponse);
     }catch (Exception e){
       LOGGER.severe(e.getMessage());
-      ErrorResponse errorResponse = new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), e.getMessage(), System.currentTimeMillis() );
-      return ResponseEntity.status(500).body(errorResponse);
+      ResponseMessage errorResponse = new ResponseMessage(HttpStatus.INTERNAL_SERVER_ERROR.value(), e.getMessage(), System.currentTimeMillis() );
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
     }
   }
 
@@ -73,7 +70,7 @@ public class DroneController {
 
     } catch (Exception e) {
       LOGGER.severe(e.getMessage());
-      ErrorResponse errorResponse = new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(),
+      ResponseMessage errorResponse = new ResponseMessage(HttpStatus.INTERNAL_SERVER_ERROR.value(),
           e.getMessage(), System.currentTimeMillis());
       return ResponseEntity.status(500).body(errorResponse);
     }
@@ -87,7 +84,7 @@ public class DroneController {
       return ResponseEntity.ok(availableDrones);
     }catch (Exception e){
       LOGGER.severe(e.getMessage());
-      ErrorResponse errorResponse = new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), e.getMessage(), System.currentTimeMillis());
+      ResponseMessage errorResponse = new ResponseMessage(HttpStatus.INTERNAL_SERVER_ERROR.value(), e.getMessage(), System.currentTimeMillis());
       return ResponseEntity.status(500).body(errorResponse);
     }
   }
@@ -100,7 +97,7 @@ public class DroneController {
       return ResponseEntity.ok(loadedMedications);
     }catch (Exception e){
       LOGGER.severe(e.getMessage());
-      ErrorResponse errorResponse = new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), e.getMessage(), System.currentTimeMillis());
+      ResponseMessage errorResponse = new ResponseMessage(HttpStatus.INTERNAL_SERVER_ERROR.value(), e.getMessage(), System.currentTimeMillis());
       return ResponseEntity.status(500).body(errorResponse);
     }
 
