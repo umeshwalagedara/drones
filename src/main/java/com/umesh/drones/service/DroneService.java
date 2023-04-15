@@ -106,13 +106,6 @@ public class DroneService {
   }
 
 
-  public Drone getDroneById(final Long id) {
-    Optional<Drone> droneOptional = droneRepo.findById(id);
-    Drone drone = droneOptional.orElseThrow( () -> new IllegalArgumentException("Invalid drone id: " + id));
-    return drone;
-  }
-
-
   @Transactional
   public void loadDrone(final Long droneId, List<MedicationDTO> medicationDTOS) throws Exception {
 
