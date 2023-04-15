@@ -2,6 +2,8 @@ package com.umesh.drones.controller;
 
 import com.umesh.drones.dto.DroneDTO;
 import com.umesh.drones.dto.MedicationDTO;
+import com.umesh.drones.entity.DroneAuditLog;
+import com.umesh.drones.repository.DroneAuditLogRepo;
 import com.umesh.drones.service.DroneService;
 import com.umesh.drones.service.MedicationService;
 import com.umesh.drones.util.ResponseMessage;
@@ -38,13 +40,6 @@ public class DroneController {
       ResponseMessage errorResponse = new ResponseMessage(HttpStatus.INTERNAL_SERVER_ERROR.value(), e.getMessage(), System.currentTimeMillis() );
       return ResponseEntity.status(500).body(errorResponse);
     }
-  }
-
-  @GetMapping
-  public ResponseEntity<List<DroneDTO>> getDrones() {
-    List<DroneDTO> droneDTOS  = droneService.getDrones();
-    return ResponseEntity.ok(droneDTOS);
-
   }
 
   @PostMapping("/{droneId}/medications")
@@ -102,5 +97,23 @@ public class DroneController {
     }
 
   }
+
+  /////////////////////////////////////////TODO- to be removed /////////////////////////
+
+  @GetMapping
+  public ResponseEntity<List<DroneDTO>> getDrones() {
+    List<DroneDTO> droneDTOS  = droneService.getDrones();
+    return ResponseEntity.ok(droneDTOS);
+  }
+
+  @Autowired
+  private DroneAuditLogRepo droneAuditLogRepo;
+
+  @GetMapping("/audit")
+  public Iterable<DroneAuditLog> getAll(){
+       return droneAuditLogRepo.findAll();
+  }
+
+
 
 }

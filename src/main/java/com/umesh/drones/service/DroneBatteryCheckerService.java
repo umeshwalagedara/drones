@@ -21,8 +21,9 @@ public class DroneBatteryCheckerService {
   @Scheduled(fixedDelay = 60000) // run every minute
   public void checkBatteryLevels() {
     List<Drone> drones = droneService.getAllDrones();
-    DroneAuditLog auditLog = new DroneAuditLog();
     for (Drone drone : drones) {
+      DroneAuditLog auditLog = new DroneAuditLog();
+
       if (drone.getBatteryCapacity() < 25) {
         auditLog.setMessage("Low battery level");
       }else if(drone.getBatteryCapacity() > 25 && drone.getBatteryCapacity() < 50){
@@ -30,6 +31,7 @@ public class DroneBatteryCheckerService {
       }else if(drone.getBatteryCapacity() > 50){
         auditLog.setMessage("Battery is sufficiently charged.");
       }
+
       auditLog.setDroneId(drone.getId());
       auditLog.setEventDate(new Date());
       droneAuditLogRepo.save(auditLog);

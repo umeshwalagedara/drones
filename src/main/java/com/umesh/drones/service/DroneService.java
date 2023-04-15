@@ -10,6 +10,7 @@ import com.umesh.drones.util.DroneState;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,12 +20,15 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class DroneService {
 
+  private static final Logger LOGGER = Logger.getLogger(DroneService.class.getName());
+
   @Autowired
   private DroneRepo droneRepo;
   @Autowired
   private MedicationService medicationService;
   @Autowired
   private MedicationRepo medicationRepo;
+
 
 
   public DroneDTO registerDrone(DroneDTO droneDTO) throws Exception {
@@ -110,13 +114,17 @@ public class DroneService {
 
 
   @Transactional
-  public void loadDrone(final Long droneId, List<MedicationDTO> medicationDTOS) {
+  public void loadDrone(final Long droneId, List<MedicationDTO> medicationDTOS) throws Exception {
 
-      Optional<Drone> droneOptional = droneRepo.findById(droneId);
-      Drone drone = droneOptional.orElseThrow( () -> new IllegalArgumentException("Invalid drone id: " + droneId));
+    Optional<Drone> droneOptional = droneRepo.findById(droneId);
+    Drone drone = droneOptional.orElseThrow( () -> new IllegalArgumentException("Invalid drone id: " + droneId));
 
       if(drone.getState() != DroneState.IDLE){
         throw new IllegalStateException("Drone must be in IDLE state to be loaded");
+      }
+
+      if(drone.getBatteryCapacity() < 25){
+        throw new IllegalStateException("Low Battery Capacity for loading");
       }
 
       double totalWeight = medicationDTOS.stream().mapToDouble(MedicationDTO::getWeight).sum();
@@ -124,20 +132,32 @@ public class DroneService {
         throw new IllegalArgumentException("Total weight of medications exceeds drone's weight limit");
       }
 
-    List<Medication> medicationList = new ArrayList<>();
-    for(MedicationDTO dto: medicationDTOS){
-      Medication medication = new Medication();
-      medication.setName(dto.getName());
-      medication.setImage(dto.getImage());
-      medication.setWeight(dto.getWeight());
-      medication.setCode(dto.getCode());
-      medication.setDroneId(drone.getId());
-      medicationList.add(medication);
-    }
+      try {
+        // set the drone to LOADING state
+        drone.setState(DroneState.LOADING);
+        droneRepo.save(drone);
 
-    medicationRepo.saveAll(medicationList);
-    drone.setState(DroneState.LOADED);
-    droneRepo.save(drone);
+        List<Medication> medicationList = new ArrayList<>();
+        for(MedicationDTO dto: medicationDTOS){
+          Medication medication = new Medication();
+          medication.setName(dto.getName());
+          medication.setImage(dto.getImage());
+          medication.setWeight(dto.getWeight());
+          medication.setCode(dto.getCode());
+          medication.setDroneId(drone.getId());
+          medicationList.add(medication);
+        }
+
+        medicationRepo.saveAll(medicationList);
+        drone.setState(DroneState.LOADED);
+        droneRepo.save(drone);
+
+      } catch (Exception e) {
+        LOGGER.severe("Error Loading the Drone" + e.getMessage());
+        drone.setState(DroneState.IDLE);
+        droneRepo.save(drone);
+        throw new Exception(" Error Loading the Drone ");
+      }
 
   }
 

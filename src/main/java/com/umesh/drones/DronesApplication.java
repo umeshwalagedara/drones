@@ -13,5 +13,4 @@ public class DronesApplication {
 		SpringApplication.run(DronesApplication.class, args);
 	}
 
-
 }
