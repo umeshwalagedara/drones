@@ -33,6 +33,12 @@ public class DroneService {
 
   public DroneDTO registerDrone(DroneDTO droneDTO) throws Exception {
       Drone drone = mapToEntity(droneDTO);
+
+      // Not allowing to register a drone in other than idle state
+      if(drone.getState() != DroneState.IDLE){
+        throw new IllegalArgumentException("Drone must be in idle state for registering.");
+      }
+
       drone = droneRepo.save(drone);
       return mapToDTO(drone);
   }
@@ -125,21 +131,21 @@ public class DroneService {
         throw new IllegalArgumentException("Total weight of medications exceeds drone's weight limit");
       }
 
+    List<Medication> medicationList = new ArrayList<>();
+    for(MedicationDTO dto: medicationDTOS){
+      Medication medication = new Medication();
+      medication.setName(dto.getName());
+      medication.setImage(dto.getImage());
+      medication.setWeight(dto.getWeight());
+      medication.setCode(dto.getCode());
+      medication.setDroneId(drone.getId());
+      medicationList.add(medication);
+    }
+
       try {
         // set the drone to LOADING state
         drone.setState(DroneState.LOADING);
         droneRepo.save(drone);
-
-        List<Medication> medicationList = new ArrayList<>();
-        for(MedicationDTO dto: medicationDTOS){
-          Medication medication = new Medication();
-          medication.setName(dto.getName());
-          medication.setImage(dto.getImage());
-          medication.setWeight(dto.getWeight());
-          medication.setCode(dto.getCode());
-          medication.setDroneId(drone.getId());
-          medicationList.add(medication);
-        }
 
         medicationRepo.saveAll(medicationList);
         drone.setState(DroneState.LOADED);

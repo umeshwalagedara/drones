@@ -63,7 +63,7 @@ class DronesApplicationTests {
 
 
 	@Test
-	public void testRegisterDroneWithInvalidSerialNo() {
+	public void testRegisterDrone_With_InvalidSerialNo() {
 		DroneDTO droneDTO = new DroneDTO();
 		// Set invalid serial number to throw exception
 		droneDTO.setSerialNumber("10000000001000000000100000000010000000001000000000100000000010000000001000000000100000000010000000001");
@@ -76,7 +76,20 @@ class DronesApplicationTests {
 	}
 
 	@Test
-	public void testRegisterDroneWithInvalidBatteryCapacity() {
+	public void testRegisterDrone_With_InvalidNonIdleState() {
+		DroneDTO droneDTO = new DroneDTO();
+		// Set invalid serial number to throw exception
+		droneDTO.setSerialNumber("10000000001000000000100000000010000000001000000000100000000010000000001000000000100000000010000000001");
+		droneDTO.setBatteryCapacity(90.0);
+		droneDTO.setWeightLimit(400.0);
+		droneDTO.setModel(DroneModel.Middleweight);
+		droneDTO.setState(DroneState.LOADING);
+		Exception exception = assertThrows(Exception.class, () -> { droneService.registerDrone(droneDTO); });
+
+	}
+
+	@Test
+	public void testRegisterDrone_With_InvalidBatteryCapacity() {
 		DroneDTO droneDTO = new DroneDTO();
 		// Set invalid battery capacity to throw exception
 		droneDTO.setSerialNumber("DR01");
@@ -88,7 +101,7 @@ class DronesApplicationTests {
 	}
 
 	@Test
-	public void testRegisterDroneWithInvalidWeightLimit() {
+	public void testRegisterDrone_With_InvalidWeightLimit() {
 		DroneDTO droneDTO = new DroneDTO();
 		// Set invalid weight limit to throw exception
 		droneDTO.setSerialNumber("DR01");
@@ -96,7 +109,7 @@ class DronesApplicationTests {
 		droneDTO.setWeightLimit(600.0);
 		droneDTO.setModel(DroneModel.Middleweight);
 		droneDTO.setState(DroneState.IDLE);
-		Exception exception = assertThrows(Exception.class, () -> { droneService.registerDrone(droneDTO); });
+		assertThrows(Exception.class, () -> { droneService.registerDrone(droneDTO); });
 	}
 
 
@@ -122,7 +135,7 @@ class DronesApplicationTests {
 		// Check if the size of the returned list matches the number of drones in the repository
 		int count = allDronesNow.size() - droneCount;
 
-		assertEquals(count, 2);
+		assertEquals(2,count);
 
 	}
 
@@ -202,7 +215,7 @@ class DronesApplicationTests {
 		}
 
 	@Test
-	public void testLoadDroneWithInvalidDroneId() throws Exception {
+	public void testLoadDrone_With_InvalidDroneId() throws Exception {
 		// Arrange
 		Long invalidDroneId = -1L;
 		List<MedicationDTO> medicationDTOS = new ArrayList<>();
@@ -218,11 +231,11 @@ class DronesApplicationTests {
 	}
 
 	@Test
-	public void testLoadDroneWithInvalidBatteryCapacity() throws Exception {
+	public void testLoadDrone_With_InvalidBatteryCapacity() throws Exception {
 
 		Drone drone = new Drone();
 		drone.setState(DroneState.IDLE);
-		drone.setBatteryCapacity(10.0);
+		drone.setBatteryCapacity(10.0);  // setting a low battery capacity
 		drone.setWeightLimit(200.0);
 		drone.setModel(DroneModel.Middleweight);
 		drone.setSerialNumber("BR01");
@@ -244,8 +257,9 @@ class DronesApplicationTests {
 
 
 	@Test
-	public void testLoadDroneWithInvalidWeight() throws Exception {
+	public void testLoadDrone_With_InvalidWeight() throws Exception {
 
+		// set too much weight from the medication List than the weight limit
 		Drone drone = new Drone();
 		drone.setState(DroneState.IDLE);
 		drone.setBatteryCapacity(10.0);
@@ -268,6 +282,56 @@ class DronesApplicationTests {
 		medicationDTO1.setWeight(175.0);
 		medicationDTO1.setImage(null);
 		medicationDTOS.add(medicationDTO1);
+
+
+		// Assert
+		final Drone finalDrone = drone;
+		assertThrows(IllegalStateException.class, () -> droneService.loadDrone(finalDrone.getId(), medicationDTOS));
+	}
+
+	@Test
+	public void testLoadDrone_With_InvalidMedicationName() throws Exception {
+
+		Drone drone = new Drone();
+		drone.setState(DroneState.IDLE);
+		drone.setBatteryCapacity(10.0);  // setting a low battery capacity
+		drone.setWeightLimit(200.0);
+		drone.setModel(DroneModel.Middleweight);
+		drone.setSerialNumber("BR01");
+		drone = droneRepo.save(drone);
+
+		List<MedicationDTO> medicationDTOS = new ArrayList<>();
+		MedicationDTO medicationDTO = new MedicationDTO();
+		medicationDTO.setCode("CODE");
+		medicationDTO.setName("Panadol@");
+		medicationDTO.setWeight(25.0);
+		medicationDTO.setImage(null);
+		medicationDTOS.add(medicationDTO);
+
+
+		// Assert
+		final Drone finalDrone = drone;
+		assertThrows(IllegalStateException.class, () -> droneService.loadDrone(finalDrone.getId(), medicationDTOS));
+	}
+
+	@Test
+	public void testLoadDrone_With_InvalidMedicationCode() throws Exception {
+
+		Drone drone = new Drone();
+		drone.setState(DroneState.IDLE);
+		drone.setBatteryCapacity(10.0);  // setting a low battery capacity
+		drone.setWeightLimit(200.0);
+		drone.setModel(DroneModel.Middleweight);
+		drone.setSerialNumber("BR01");
+		drone = droneRepo.save(drone);
+
+		List<MedicationDTO> medicationDTOS = new ArrayList<>();
+		MedicationDTO medicationDTO = new MedicationDTO();
+		medicationDTO.setCode("CODE");
+		medicationDTO.setName("Panadol@");
+		medicationDTO.setWeight(25.0);
+		medicationDTO.setImage(null);
+		medicationDTOS.add(medicationDTO);
 
 
 		// Assert

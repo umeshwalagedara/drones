@@ -43,7 +43,7 @@ public class Medication {
 
   public void setName(final String name) {
     if (!name.matches("[A-Za-z0-9_-]+")) {
-      throw new IllegalArgumentException("Name contains invalid characters.");
+      throw new IllegalArgumentException("Medication Name contains invalid characters.");
     }
     this.name = name;
   }
