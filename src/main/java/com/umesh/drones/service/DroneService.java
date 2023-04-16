@@ -6,6 +6,7 @@ import com.umesh.drones.entity.Drone;
 import com.umesh.drones.entity.Medication;
 import com.umesh.drones.repository.DroneRepo;
 import com.umesh.drones.repository.MedicationRepo;
+import com.umesh.drones.util.CommonConstants;
 import com.umesh.drones.util.DroneState;
 import java.util.ArrayList;
 import java.util.List;
@@ -36,7 +37,7 @@ public class DroneService {
 
       // Not allowing to register a drone in other than idle state
       if(drone.getState() != DroneState.IDLE){
-        throw new IllegalArgumentException("Drone must be in idle state for registering.");
+        throw new IllegalArgumentException(CommonConstants.ERROR_DRONE_NOT_IN_IDLE);
       }
 
       drone = droneRepo.save(drone);
@@ -63,12 +64,7 @@ public class DroneService {
     return droneList;
   }
 
-  /**
-   * Convert a droneDTO to a drone object
-   * The setters will have validations to check if the dto contains valid data
-   * @param droneDTO
-   * @return
-   */
+
   private Drone mapToEntity(DroneDTO droneDTO){
     Drone drone = new Drone();
     drone.setBatteryCapacity(droneDTO.getBatteryCapacity());
@@ -106,7 +102,7 @@ public class DroneService {
 
 
   public List<MedicationDTO> getLoadedMedications(final Long droneId) {
-    Drone drone = droneRepo.findById(droneId).orElseThrow(() -> new IllegalArgumentException("Invalid drone id: " + droneId));
+    Drone drone = droneRepo.findById(droneId).orElseThrow(() -> new IllegalArgumentException(CommonConstants.ERROR_INVALID_DRONE_ID + droneId));
     List<MedicationDTO> medicationDTOList = medicationService.findByDroneId(drone.getId());
     return medicationDTOList;
   }
@@ -116,19 +112,19 @@ public class DroneService {
   public void loadDrone(final Long droneId, List<MedicationDTO> medicationDTOS) throws Exception {
 
     Optional<Drone> droneOptional = droneRepo.findById(droneId);
-    Drone drone = droneOptional.orElseThrow( () -> new IllegalArgumentException("Invalid drone id: " + droneId));
+    Drone drone = droneOptional.orElseThrow( () -> new IllegalArgumentException(CommonConstants.ERROR_INVALID_DRONE_ID + droneId));
 
       if(drone.getState() != DroneState.IDLE){
-        throw new IllegalStateException("Drone must be in IDLE state to be loaded");
+        throw new IllegalStateException(CommonConstants.ERROR_DRONE_NOT_IN_IDLE_FOR_LOADING);
       }
 
       if(drone.getBatteryCapacity() < 25){
-        throw new IllegalStateException("Low Battery Capacity for loading");
+        throw new IllegalStateException(CommonConstants.ERROR_LOW_BATTERY_CAPACITY);
       }
 
       double totalWeight = medicationDTOS.stream().mapToDouble(MedicationDTO::getWeight).sum();
       if (totalWeight > drone.getWeightLimit()) {
-        throw new IllegalArgumentException("Total weight of medications exceeds drone's weight limit");
+        throw new IllegalArgumentException(CommonConstants.ERROR_WEIGHT_LIMIT_EXCEEDS);
       }
 
     List<Medication> medicationList = new ArrayList<>();
@@ -152,10 +148,10 @@ public class DroneService {
         droneRepo.save(drone);
 
       } catch (Exception e) {
-        LOGGER.severe("Error Loading the Drone" + e.getMessage());
+        LOGGER.severe(CommonConstants.ERROR_LOADING_DRONE + e.getMessage());
         drone.setState(DroneState.IDLE);
         droneRepo.save(drone);
-        throw new Exception(" Error Loading the Drone ");
+        throw new Exception(CommonConstants.ERROR_LOADING_DRONE);
       }
 
   }

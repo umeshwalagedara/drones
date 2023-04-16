@@ -3,6 +3,7 @@ package com.umesh.drones.service;
 import com.umesh.drones.entity.Drone;
 import com.umesh.drones.entity.DroneAuditLog;
 import com.umesh.drones.repository.DroneAuditLogRepo;
+import com.umesh.drones.util.CommonConstants;
 import java.util.Date;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,11 +26,11 @@ public class DroneBatteryCheckerService {
       DroneAuditLog auditLog = new DroneAuditLog();
 
       if (drone.getBatteryCapacity() < 25) {
-        auditLog.setMessage("Low battery level");
+        auditLog.setMessage(CommonConstants.LOW_BATTERY_LEVEL);
       }else if(drone.getBatteryCapacity() > 25 && drone.getBatteryCapacity() < 50){
-        auditLog.setMessage("Battery reached half mark.");
+        auditLog.setMessage(CommonConstants.BATTERY_LEVEL_HALF);
       }else if(drone.getBatteryCapacity() > 50){
-        auditLog.setMessage("Battery is sufficiently charged.");
+        auditLog.setMessage(CommonConstants.BATTERY_LEVEL_SUFFICIENT);
       }
 
       auditLog.setDroneId(drone.getId());

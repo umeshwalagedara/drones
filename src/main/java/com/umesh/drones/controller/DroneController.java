@@ -2,10 +2,9 @@ package com.umesh.drones.controller;
 
 import com.umesh.drones.dto.DroneDTO;
 import com.umesh.drones.dto.MedicationDTO;
-import com.umesh.drones.entity.DroneAuditLog;
-import com.umesh.drones.repository.DroneAuditLogRepo;
 import com.umesh.drones.service.DroneService;
 import com.umesh.drones.service.MedicationService;
+import com.umesh.drones.util.CommonConstants;
 import com.umesh.drones.util.ResponseMessage;
 import java.util.List;
 import java.util.logging.Logger;
@@ -47,7 +46,7 @@ public class DroneController {
 
     try{
       droneService.loadDrone(droneId, medications);
-      ResponseMessage successResponse  = new ResponseMessage(HttpStatus.OK.value(), "Drone loaded successfully.", System.currentTimeMillis());
+      ResponseMessage successResponse  = new ResponseMessage(HttpStatus.OK.value(), CommonConstants.DRONE_LOADED_SUCCESSFULLY, System.currentTimeMillis());
       return ResponseEntity.status(HttpStatus.OK).body(successResponse);
     }catch (Exception e){
       LOGGER.severe(e.getMessage());
