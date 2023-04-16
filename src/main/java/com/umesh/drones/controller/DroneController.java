@@ -98,22 +98,6 @@ public class DroneController {
 
   }
 
-  /////////////////////////////////////////TODO- to be removed /////////////////////////
-
-  @GetMapping
-  public ResponseEntity<List<DroneDTO>> getDrones() {
-    List<DroneDTO> droneDTOS  = droneService.getDrones();
-    return ResponseEntity.ok(droneDTOS);
-  }
-
-  @Autowired
-  private DroneAuditLogRepo droneAuditLogRepo;
-
-  @GetMapping("/audit")
-  public Iterable<DroneAuditLog> getAll(){
-       return droneAuditLogRepo.findAll();
-  }
-
 
 
 }
